@@ -78,7 +78,7 @@ public class AdjListsGraph implements WeightedGraph {
     @Override
     public void removeEdge(int v1, int v2) {
         eCount -= countingRemove(vAdjLists.get(v1), v2);
-        eCount -= countingRemove(vAdjLists.get(v2), v1);
+        countingRemove(vAdjLists.get(v2), v1);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class AdjListsGraph implements WeightedGraph {
 
     @Override
     public int getAdjCount(int v){return vAdjLists.get(v).size();}
-
+    //возможно добавить кратность!!!!!!!!!!!!!!!
     @Override
     public void addEdge(int v1, int v2, double weight) {
         int maxV = Math.max(v1, v2);
@@ -128,6 +128,30 @@ public class AdjListsGraph implements WeightedGraph {
                 }
             });
         }
+    }
+
+    @Override
+    public void addVertex() {
+        vAdjLists.add(new LinkedList<>());//?
+        vCount++;
+    }
+
+    @Override
+    public void removeVertex(int v) {
+        vCount--;
+        eCount -= vAdjLists.get(v).size();
+        //
+        for (WeightedEdgeTo edge : adjacenciesWithWeights(v)) {
+            /*
+            WeightedEdgeTo removeE = null;
+            for (WeightedEdgeTo edge1 : vAdjLists.get(edge.to())) {
+                if (edge1.to() == v)
+                    removeE = edge1;
+            }
+            vAdjLists.get(edge.to()).remove(removeE);*/
+            countingRemove(vAdjLists.get(edge.to()), v);
+        }
+        vAdjLists.set(v, null);
     }
 
     @Override

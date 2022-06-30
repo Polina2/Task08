@@ -43,4 +43,8 @@ public interface WeightedGraph extends Graph {
         }
         return null;
     }
+
+    void addVertex();
+
+    void removeVertex(int v);
 }

@@ -19,6 +19,7 @@ public class GraphFrame extends JFrame {
     private JButton buttonRemoveNode;
     private JButton buttonAddEdge;
     private JButton buttonRemoveEdge;
+    private JButton buttonSolution;
 
     enum ViewState{
         ADD_NODE,
@@ -34,6 +35,8 @@ public class GraphFrame extends JFrame {
     private Integer idCounter = 0;
     private NodeView selectedNode = null;
     private EdgeView newEdge = null;
+
+    private WeightedGraph graph = new AdjListsGraph();
 
     private Optional<EdgeView> findEdgeView(Integer x, Integer y) {
         return edges.stream().filter(edgeView -> {
@@ -89,6 +92,7 @@ public class GraphFrame extends JFrame {
                                 x, y, x, y);
 //                        newNode.draw(panelMain.getGraphics());
                         nodes.add(newNode);
+                        graph.addVertex();
                         break;
                     case ADD_EDGE:
                         Optional<NodeView> ifNode = findNodeView(x, y);
@@ -136,6 +140,7 @@ public class GraphFrame extends JFrame {
                                     }
                                 }
                             }
+                            graph.removeVertex(selectedNode.getId());
                         }
                         selectedNode = null;
                         break;
@@ -149,6 +154,7 @@ public class GraphFrame extends JFrame {
                                         node.getId().equals(newEdge.getIdDst()))
                                     node.getEdges().remove(newEdge);
                             }
+                            graph.removeEdge(newEdge.getId(), newEdge.getIdDst());
                         }
                         newEdge = null;
                         break;
@@ -179,6 +185,8 @@ public class GraphFrame extends JFrame {
 
                             String weight = JOptionPane.showInputDialog("Enter weight");
                             newEdge.setWeight(Integer.parseInt(weight));
+
+                            graph.addEdge(newEdge.getId(), newEdge.getIdDst(), newEdge.getWeight());
                         } else {
                             selectedNode.getEdges().remove(newEdge);
                             edges.remove(newEdge);
@@ -252,6 +260,12 @@ public class GraphFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 viewState = ViewState.REMOVE_EDGE;
+            }
+        });
+        buttonSolution.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Solution.solution(graph);
             }
         });
     }
