@@ -88,8 +88,12 @@ public class AdjListsGraph implements WeightedGraph {
     }
 
     @Override
-    public int getAdjCount(int v){return vAdjLists.get(v).size();}
-    //возможно добавить кратность!!!!!!!!!!!!!!!
+    public int getAdjCount(int v){
+        if (vAdjLists.get(v) == null)
+            return 0;
+        return vAdjLists.get(v).size();
+    }
+    //возможно добавить кратность
     @Override
     public void addEdge(int v1, int v2, double weight) {
         int maxV = Math.max(v1, v2);
@@ -97,42 +101,83 @@ public class AdjListsGraph implements WeightedGraph {
         for (; vCount <= maxV; vCount++) {
             vAdjLists.add(null);
         }
-        if (!isAdj(v1, v2)) {
-            if (vAdjLists.get(v1) == null) {
-                vAdjLists.set(v1, new LinkedList<>());
-            }
-            vAdjLists.get(v1).add(new WeightedEdgeTo() {
-                @Override
-                public int to() {
-                    return v2;
-                }
 
-                @Override
-                public double weight() {
-                    return weight;
-                }
-            });
-            eCount++;
-            if (vAdjLists.get(v2) == null) {
-                vAdjLists.set(v2, new LinkedList<>());
-            }
-            vAdjLists.get(v2).add(new WeightedEdgeTo() {
-                @Override
-                public int to() {
-                    return v1;
-                }
-
-                @Override
-                public double weight() {
-                    return weight;
-                }
-            });
+        if (vAdjLists.get(v1) == null) {
+            vAdjLists.set(v1, new LinkedList<>());
         }
+        vAdjLists.get(v1).add(new WeightedEdgeTo() {
+            private int number = 0;
+            private boolean visited = false;
+
+            public int getNumber() {
+                return number;
+            }
+
+            public void setNumber(int number) {
+                this.number = number;
+            }
+
+            @Override
+            public void setVisited(boolean v) {
+                this.visited = v;
+            }
+
+            @Override
+            public boolean getVisited() {
+                return visited;
+            }
+
+            @Override
+            public int to() {
+                return v2;
+            }
+
+            @Override
+            public double weight() {
+                return weight;
+            }
+        });
+        eCount++;
+        if (vAdjLists.get(v2) == null) {
+            vAdjLists.set(v2, new LinkedList<>());
+        }
+        vAdjLists.get(v2).add(new WeightedEdgeTo() {
+            private int number = 0;
+            private boolean visited= false;
+
+            @Override
+            public void setVisited(boolean v) {
+                this.visited = v;
+            }
+
+            @Override
+            public boolean getVisited() {
+                return visited;
+            }
+
+            public int getNumber() {
+                return number;
+            }
+
+            public void setNumber(int number) {
+                this.number = number;
+            }
+
+            @Override
+            public int to() {
+                return v1;
+            }
+
+            @Override
+            public double weight() {
+                return weight;
+            }
+        });
     }
 
     @Override
     public void addVertex() {
-        vAdjLists.add(new LinkedList<>());//?
+        vAdjLists.add(new LinkedList<>());
         vCount++;
     }
 
@@ -142,13 +187,7 @@ public class AdjListsGraph implements WeightedGraph {
         eCount -= vAdjLists.get(v).size();
         //
         for (WeightedEdgeTo edge : adjacenciesWithWeights(v)) {
-            /*
-            WeightedEdgeTo removeE = null;
-            for (WeightedEdgeTo edge1 : vAdjLists.get(edge.to())) {
-                if (edge1.to() == v)
-                    removeE = edge1;
-            }
-            vAdjLists.get(edge.to()).remove(removeE);*/
+
             countingRemove(vAdjLists.get(edge.to()), v);
         }
         vAdjLists.set(v, null);

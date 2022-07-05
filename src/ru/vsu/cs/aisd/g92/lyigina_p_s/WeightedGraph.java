@@ -13,6 +13,10 @@ public interface WeightedGraph extends Graph {
     interface WeightedEdgeTo {
         int to();
         double weight();
+        int getNumber();
+        void setNumber(int number);
+        void setVisited(boolean v);
+        boolean getVisited();
     }
 
     /**
@@ -42,6 +46,16 @@ public interface WeightedGraph extends Graph {
             }
         }
         return null;
+    }
+
+    default int countEdges(int v1, int v2) {
+        int res = 0;
+        for (WeightedEdgeTo adj : adjacenciesWithWeights(v1)) {
+            if (adj.to() == v2) {
+                res++;
+            }
+        }
+        return res;
     }
 
     void addVertex();

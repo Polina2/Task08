@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class GraphFrame extends JFrame {
     private JPanel drawPanel;
@@ -20,6 +21,8 @@ public class GraphFrame extends JFrame {
     private JButton buttonAddEdge;
     private JButton buttonRemoveEdge;
     private JButton buttonSolution;
+    private JTextField textFieldTime;
+    private JButton buttonClear;
 
     enum ViewState{
         ADD_NODE,
@@ -265,7 +268,44 @@ public class GraphFrame extends JFrame {
         buttonSolution.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Solution.solution(graph);
+                textFieldTime.setText(""+Solution.solution(graph));
+                boolean[][] visited = new boolean[graph.vertexCount()][graph.vertexCount()];
+                GraphAlgorithms.dfs(graph, 0, new GraphAlgorithms.Consumer1() {
+                    @Override
+                    public void accept(WeightedGraph.WeightedEdgeTo edge, int from) {
+                        int indent;
+                        Color color;
+                        if (!visited[edge.to()][from]){
+                            indent = 10;
+                            color = Color.red;
+                            visited[edge.to()][from] = true;
+                            visited[from][edge.to()] = true;
+                        } else {
+                            indent = 15;
+                            color = Color.blue;
+                        }
+                        for (EdgeView edgeView : edges){
+                            if (edgeView.getId().equals(from) && edgeView.getIdDst().equals(edge.to())
+                            || edgeView.getId().equals(edge.to()) && edgeView.getIdDst().equals(from)){
+                                Graphics gr = drawPanel.getGraphics();
+                                gr.setColor(color);
+                                gr.drawString(""+edge.getNumber(),
+                                        edgeView.getCenter().x+indent, edgeView.getCenter().y+indent);
+                            }
+                        }
+                    }
+                });
+            }
+        });
+        buttonClear.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                drawPanel.getGraphics().clearRect(0, 0, getWidth(), getHeight());
+                idCounter = 0;
+                nodes = new ArrayList<>();
+                edges = new ArrayList<>();
+                graph = new AdjListsGraph();
+                textFieldTime.setText("");
             }
         });
     }
