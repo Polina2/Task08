@@ -19,13 +19,13 @@ public class Solution {
                 odd.add(i);
         }
         if (odd.isEmpty())
-            return euler(graph, 0, 0, new int[graph.vertexCount()]);
+            return euler1(graph, 0, 0, new int[graph.vertexCount()]);
         else if (odd.size() == 2)
-            return euler(graph, odd.get(0), odd.get(1), new int[graph.vertexCount()]);
+            return euler1(graph, odd.get(0), odd.get(1), new int[graph.vertexCount()]);
         else {
             int[] newEdges = new int[graph.vertexCount()];
             doubleEdges(graph, odd, newEdges);
-            return euler(graph, 0, 0, newEdges);
+            return euler1(graph, 0, 0, newEdges);
         }
     }
 
@@ -60,6 +60,67 @@ public class Solution {
         }
     }
 
+    private static int euler1(WeightedGraph graph, int begin, int end, int[] newEdges) {
+        int time = graph.getAdjCount(begin) - newEdges[begin];
+        int count = 1;
+        int currV = begin;
+        WeightedGraph.WeightedEdgeTo currE = null;
+        WeightedGraph.WeightedEdgeTo tempE = null;
+        int[][] edgesCount = new int[graph.vertexCount()][graph.vertexCount()];
+        for (int v = 0; v < graph.vertexCount(); v++) {
+            for (WeightedGraph.WeightedEdgeTo e : graph.adjacenciesWithWeights(v)){
+                edgesCount[v][e.to()]++;
+            }
+        }
+        for (int v = 0; v < graph.vertexCount(); v++) {
+            for (WeightedGraph.WeightedEdgeTo e : graph.adjacenciesWithWeights(v)){
+                if (edgesCount[v][e.to()]==1)
+                    edgesCount[v][e.to()] = 0;
+            }
+        }
+        boolean visited = false;
+        w:
+        while (currV != end || !visited){
+            for (WeightedGraph.WeightedEdgeTo e : graph.adjacenciesWithWeights(currV)){
+                if (e != null && e.getNumber()==0) {
+                    if (edgesCount[currV][e.to()] == 2) {
+                        currE = e;
+                        edgesCount[currV][e.to()]--;
+                        edgesCount[e.to()][currV]--;
+                        break;
+                    }
+                    if (edgesCount[currV][e.to()] == 1 || e.to() == end)
+                        tempE = e;
+                    else {
+                        currE = e;
+                    }
+                }
+            }
+            if (currE == null){
+                currE = tempE;
+            }
+            time += currE.weight() + graph.getAdjCount(currE.to()) - newEdges[currE.to()];
+            currE.setNumber(count);
+            for (WeightedGraph.WeightedEdgeTo edge : graph.adjacenciesWithWeights(currE.to())) {
+                if (edge.to() == currV && edge.getNumber()==0){
+                    edge.setNumber(count);
+                    break;
+                }
+            }
+            count++;
+            currV = currE.to();
+            currE = null; tempE = null;
+            if (currV == end){
+                for (WeightedGraph.WeightedEdgeTo edge : graph.adjacenciesWithWeights(currV)) {
+                    if (edge.getNumber()==0)
+                        continue w;
+                }
+                visited = true;
+            }
+        }
+        return time;
+    }
+
     private static int euler(WeightedGraph graph, int begin, int end, int[] newEdges) {
         int time = graph.getAdjCount(begin) - newEdges[begin];
         int count = 1;
@@ -73,7 +134,6 @@ public class Solution {
             for (WeightedGraph.WeightedEdgeTo edge : graph.adjacenciesWithWeights(currV)) {
                 if (edge != null && edge.getNumber() == 0) {
                     if (edge.to() != end){
-                        //
                         time += edge.weight() + graph.getAdjCount(edge.to()) - newEdges[edge.to()];
                         edge.setNumber(count);
                         for (WeightedGraph.WeightedEdgeTo edge1 : graph.adjacenciesWithWeights(edge.to())) {
@@ -93,7 +153,6 @@ public class Solution {
                 }
             }
             if (!changed && isEnd) {
-                //currV = end;
                 endEdge.setNumber(count);
                 time += endEdge.weight() + graph.getAdjCount(end) - newEdges[end];
                 for (WeightedGraph.WeightedEdgeTo edge : graph.adjacenciesWithWeights(end)){
@@ -114,5 +173,4 @@ public class Solution {
         }
         return time;
     }
-
 }
